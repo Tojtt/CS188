@@ -124,7 +124,7 @@ def breadthFirstSearch(problem: SearchProblem):
     ##get the starting State and new step list
     start = (problem.getStartState(), [])
 
-    ##add the starting point into the stack
+    ##add the starting point into the queue
     fringe.push(start)
     while not fringe.isEmpty():
         (state, path) = fringe.pop()
@@ -153,10 +153,10 @@ def uniformCostSearch(problem: SearchProblem):
     ##get the starting State and new step list
     start = (problem.getStartState(), [], 0)
 
-    ##add the starting point into the stack
-    fringe.push(start)
+    ##add the starting point into the queue
+    fringe.push(start, 0)
     while not fringe.isEmpty():
-        (state, path, cost ) = fringe.pop()
+        (state, path, cost) = fringe.pop()
         if problem.isGoalState(state):
             steps = path
             break
@@ -165,9 +165,9 @@ def uniformCostSearch(problem: SearchProblem):
             expanded.append(state)
             for successor in problem.getSuccessors(state):
                 newPath = path + [successor[1]]
-                newCost = path + [successor[2]]
+                newCost = cost + successor[2]
                 newState = (successor[0], newPath, newCost)
-                fringe.push(newState)
+                fringe.push(newState, newCost)
     
     return steps
     util.raiseNotDefined()
@@ -182,6 +182,32 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    steps = []
+    expanded = []
+    fringe = util.PriorityQueue()
+
+    ##get the starting State and new step list
+    start = (problem.getStartState(), [], 0)
+
+    ##add the starting point into the queue
+    fringe.push(start, heuristic())
+    while not fringe.isEmpty():
+        (state, path, cost) = fringe.pop()
+        if problem.isGoalState(state):
+            steps = path
+            break
+
+        if state not in expanded:
+            expanded.append(state)
+            for successor in problem.getSuccessors(state):
+                newPath = path + [successor[1]]
+                newCost = cost + successor[2]
+                newState = (successor[0], newPath, newCost)
+                fringe.push(newState, newCost)
+    
+    return steps
+    
     util.raiseNotDefined()
 
 
