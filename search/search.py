@@ -191,9 +191,9 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     start = (problem.getStartState(), [], 0)
 
     ##add the starting point into the queue
-    fringe.push(start, heuristic())
+    fringe.push(start, 0)
     while not fringe.isEmpty():
-        (state, path, cost) = fringe.pop()
+        (state, path, hscore) = fringe.pop()
         if problem.isGoalState(state):
             steps = path
             break
@@ -202,9 +202,9 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
             expanded.append(state)
             for successor in problem.getSuccessors(state):
                 newPath = path + [successor[1]]
-                newCost = cost + successor[2]
-                newState = (successor[0], newPath, newCost)
-                fringe.push(newState, newCost)
+                newhscore =  hscore + heuristic(successor[0], problem)
+                newState = (successor[0], newPath, newhscore)
+                fringe.push(newState, newhscore)
     
     return steps
     
