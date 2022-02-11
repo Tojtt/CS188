@@ -15,6 +15,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
+import math
 
 from game import Agent
 from pacman import GameState
@@ -68,14 +69,57 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+
+        "*** YOUR CODE HERE ***"
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        
+        posFood = newFood.asList()
+        posGhost = [(ghost.getPosition()[0], ghost.getPosition()[1]) for ghost in newGhostStates]
+        
+        ghostDists = [manhattanDistance(newPos, ghost) for ghost in posGhost]
+        minGhostDist = min(ghostDists, default = 1000)
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        foodDists = [manhattanDistance(newPos, food) for food in posFood]
+        minFoodDist = min(foodDists, default = 1000)
+
+        weight = .4
+        score = weight*(1/(minFoodDist+.1)) - (1-weight)*(1/(minGhostDist+.1))
+        print(minFoodDist)
+        print(minGhostDist)
+        print(score)
+        
+        return score
+        ghostDistances = [manhattanDistance(newPos, ghost.configuration.pos)
+                          for ghost in newGhostStates
+                          if ghost.scaredTimer == 0]
+
+        minGhostDist = min(ghostDistances, default=100)
+        if minGhostDist == 0:
+            return -math.inf
+        numFood = successorGameState.getNumFood()
+        if numFood == 0:
+            return math.inf
+
+        food = currentGameState.getFood()
+        if food[newPos[0]][newPos[1]]:
+            minFoodDist = 0
+        else:
+            foodDistances = [
+                manhattanDistance(newPos, (x, y))
+                for x in range(food.width)
+                for y in range(food.height)
+                if food[x][y]
+            ]
+            minFoodDist = min(foodDistances, default=0)
+
+        danger = 1 / (minGhostDist - 0.8)
+        profit = 1 / (minFoodDist + 0.5)
+        score = -danger + profit
+        return score
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
