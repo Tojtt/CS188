@@ -84,42 +84,13 @@ class ReflexAgent(Agent):
         minGhostDist = min(ghostDists, default = 1000)
 
         foodDists = [manhattanDistance(newPos, food) for food in posFood]
-        minFoodDist = min(foodDists, default = 1000)
+        minFoodDist = min(foodDists, default = 5)
 
-        weight = .4
-        score = weight*(1/(minFoodDist+.1)) - (1-weight)*(1/(minGhostDist+.1))
-        print(minFoodDist)
-        print(minGhostDist)
-        print(score)
+        score = (1/(minFoodDist + 0.5)) - (1/(minGhostDist - 0.8)) + (successorGameState.getScore() - currentGameState.getScore())
+        return score
         
-        return score
-        ghostDistances = [manhattanDistance(newPos, ghost.configuration.pos)
-                          for ghost in newGhostStates
-                          if ghost.scaredTimer == 0]
 
-        minGhostDist = min(ghostDistances, default=100)
-        if minGhostDist == 0:
-            return -math.inf
-        numFood = successorGameState.getNumFood()
-        if numFood == 0:
-            return math.inf
-
-        food = currentGameState.getFood()
-        if food[newPos[0]][newPos[1]]:
-            minFoodDist = 0
-        else:
-            foodDistances = [
-                manhattanDistance(newPos, (x, y))
-                for x in range(food.width)
-                for y in range(food.height)
-                if food[x][y]
-            ]
-            minFoodDist = min(foodDistances, default=0)
-
-        danger = 1 / (minGhostDist - 0.8)
-        profit = 1 / (minFoodDist + 0.5)
-        score = -danger + profit
-        return score
+    
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
