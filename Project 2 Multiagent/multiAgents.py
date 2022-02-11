@@ -78,7 +78,7 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
         
         posFood = newFood.asList()
-        posGhost = [(ghost.getPosition()[0], ghost.getPosition()[1]) for ghost in newGhostStates]
+        posGhost = [(ghost.getPosition()[0], ghost.getPosition()[1]) for ghost in newGhostStates if ghost.scaredTimer == 0]
         
         ghostDists = [manhattanDistance(newPos, ghost) for ghost in posGhost]
         minGhostDist = min(ghostDists, default = 1000)
