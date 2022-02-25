@@ -50,9 +50,20 @@ def sentence1() -> Expr:
     
     A or B
     (not A) if and only if ((not B) or C)
+    ¬ A ↔ (¬ B or C)
     (not A) or (not B) or C
+    ¬ A or ¬ B or C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    A = Expr('A')
+    B = Expr('B')
+    C = Expr('C')
+    a_or_b =  disjoin(A,B)
+    noA_impnoBC = (~A) % (~B | C)
+
+    not_ABC = disjoin(~A, ~B, C)
+
+    return conjoin(a_or_b, noA_impnoBC, not_ABC)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -66,6 +77,17 @@ def sentence2() -> Expr:
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
+    A = Expr('A')
+    B = Expr('B')
+    C = Expr('C')
+    D = Expr('D')
+
+    c_iif_BC = C % (B|D)
+    a_imp_BD = A >> (~B & ~D)
+    notBC_impA = (~(B & ~C)) >> A
+    notD_impC = (~D) >> C
+
+    return conjoin(c_iif_BC, a_imp_BD, notBC_impA, notD_impC)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -84,6 +106,15 @@ def sentence3() -> Expr:
     (Project update: for this question only, [0] and _t are both acceptable.)
     """
     "*** BEGIN YOUR CODE HERE ***"
+    Alive1 = PropSymbolExpr("PacmanAlive_1")
+    Alive0 = PropSymbolExpr('PacmanAlive_0')
+    Born0 = PropSymbolExpr('PacmanBorn_0')
+    Killed0 = PropSymbolExpr('PacmanKilled_0')
+
+    aliveNow = Alive1 % disjoin(conjoin(Alive0, ~Killed0), conjoin(~Alive0 & Born0))
+    noboth = conjoin(Alive0, Born0)
+    return conjoin(aliveNow, ~noboth, Born0)
+
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -109,6 +140,7 @@ def findModelCheck() -> Dict[Any, bool]:
         def __repr__(self):
             return self.variable_name
     "*** BEGIN YOUR CODE HERE ***"
+    return {dummyClass("a"): True}
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -116,6 +148,11 @@ def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    if (not findModel(conjoin(premise, ~conclusion))):
+        return True
+    else:
+        return False
+
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -124,6 +161,11 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    if findModel(~inverse_statement):
+        return True
+    else:
+        return False
+
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
