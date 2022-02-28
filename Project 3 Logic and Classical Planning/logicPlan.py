@@ -349,7 +349,7 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
         - Results of calling successorAxioms(...), describing how Pacman can end in various
             locations on this time step. Consider edge cases. Don't call if None.
     """
-
+    
     pacphysics_sentences = []
 
     for coords in all_coords:
@@ -428,7 +428,7 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(action0Logic)
     KB.append(action1Logic)
     kbLogic = conjoin(KB)
-  
+    
     return (findModel(conjoin(kbLogic, location1Logic)), findModel(conjoin(kbLogic, ~location1Logic)))
 
     util.raiseNotDefined()
@@ -609,11 +609,22 @@ def localization(problem, agent) -> Generator:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    sensorAxioms
+    fourBitPerceptRules
+
+    #add to KB where the walls are wall_list and aren't in wallList
 
     for t in range(agent.num_timesteps):
+        #add pacphysics, action, and percept information to KB
+        #find posisble pacman locations with updated KB
+        #call agent.moveToNextState(action_t) on current agent action at timestep t
+
         "*** END YOUR CODE HERE ***"
+        #yield possible locations
         yield possible_locations
+
+
+     util.raiseNotDefined()
 
 # ______________________________________________________________________________
 # QUESTION 7
