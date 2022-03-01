@@ -457,105 +457,33 @@ def positionLogicPlan(problem) -> List:
     non_wall_coords = [loc for loc in all_coords if loc not in walls_list]
     actions = ['North', 'South', 'East', 'West']
     KB = []
-    expression = []
+   
     "*** BEGIN YOUR CODE HERE ***"
-    ## Add to KB: Initial knowledge: Pacman's initial location at timestep 0
-    # CAN ONLY START AT ONE LOCATION
-    for x in range(1, width+1) :
-        for y in range(1, height+1) :
-            if (x, y) == (x0, y0):
-                if expression:
-                    v = expression.pop()
-                    expression.append(conjoin(v,PropSymbolExpr("P", x, y, 0)))
-                else:
-                    expression.append(Expr(PropSymbolExpr("P", x, y, 0)))
-            else:
-                if expression:
-                    v = expression.pop()
-                    expression.append(conjoin(v,Expr("~", PropSymbolExpr("P", x, y, 0))))
-                else:
-                    expression.append(Expr("~", PropSymbolExpr("P", x, y, 0)))
-    initialLogic = expression[0]
-    KB.append(initialLogic)
 
-
-    successors = []
-    exclusion = []
-    for t in range(50):
-        succ = []
-        ex = []
-        suc = []
-        if t > 0:
-            for x in range(1, width + 1):
-                for y in range(1, height + 1):
-                    if (x, y) not in walls_list:
-                        succ += [pacmanSuccessorAxiomSingle(x, y, t, walls_grid)]
-            suc = conjoin(succ) #or every place at t 
-            if successors:
-                success = conjoin(suc, conjoin(successors)) #combine with previous successors
-            else:
-                success = suc
-
-
-            # ONLY ONE ACTION CAN BE TAKEN
-            for action in actions: #exclusion axioms
-                ex.append(PropSymbolExpr(action, t-1))
-            n = exactlyOne(ex)
-            exclusion.append(n)
-            exclus = conjoin(exclusion)
-
-
-            # GOAL TEST
-            goal = conjoin(PropSymbolExpr("P", xg, yg, t+1), pacmanSuccessorAxiomSingle(xg, yg, t+1, walls_grid))
-
-            
-            # CONJOIN AND FIND MODEL
-            j = findModel(conjoin(initialLogic, goal, exclus, success)) #and them together
-
-        else:
-            goal = logic.conjoin(logic.PropSymbolExpr("P", xg, yg, t+1), pacmanSuccessorAxiomSingle(xg, yg, t+1, walls_grid))
-            j = findModel(logic.conjoin(initialLogic, goal))
-        if j is not False:
-            return extractActionSequence(j, actions)
-        if suc:
-            successors.append(suc)
-    return None
     
-    # for t in range(50):
-    #     print(t)
-    #     if t > 0:
-    #         possible_locations = []
-    #         transitions = []
-    #         actionList = []
-    #         for coords in non_wall_coords:
-    #             x, y = coords[0], coords[1]
-    #             possible_locations.append(PropSymbolExpr(pacman_str, x, y, time = t))
-    #             transitions += [pacmanSuccessorAxiomSingle(x, y, t, walls_grid)]
-
-    #         KB.append(exactlyOne(possible_locations))
-    #         transitionsLogic = conjoin(transitions)
-    #         KB.append(transitionsLogic)
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0)) #use propsymbolexpr, not correct syntax, always make sure to append expr
+    for t in range(50):
+        print(t)
+        #for one in non_wall_coords:
+        propExpr = []
+        for x, y in non_wall_coords:
+            propExpr.append(PropSymbolExpr(pacman_str, x, y, time = t))
+        KB.append(exactlyOne(propExpr))
+        goal_assertion = PropSymbolExpr(pacman_str, xg, yg, time=t)
+        #KB.append(go)
+        model = findModel(conjoin([goal_assertion] + KB))  
+        if model:
+            return extractActionSequence(model, actions)
             
-            
-    #         ##Add to KB: Pacman takes exactly one action per timestep.
-    #         for action in actions:
-    #             actionList.append(PropSymbolExpr(action, t))
-    #             KB.append(exactlyOne(actionList))
+        #pacman can only take one action per timestep  
+        conjoined = []
+        for action in actions:
+            conjoined.append(PropSymbolExpr(action, time=t))
+        KB.append(exactlyOne(conjoined))
+        for x, y in non_wall_coords:
+                KB.append(pacmanSuccessorAxiomSingle(x, y, t + 1, walls_grid))
+    return None
 
-
-    #         ##goal test
-    #         kbLogic = conjoin(KB)
-    #         currentGoalLogic = conjoin(PropSymbolExpr(pacman_str, xg, yg, t + 1), pacmanSuccessorAxiomSingle(xg, yg, t+1, walls_grid))
-    #         currentGoalModel = findModel(conjoin(kbLogic, currentGoalLogic))
-    #     else:
-    #         currentGoalLogic = conjoin(PropSymbolExpr(pacman_str, xg, yg, t + 1), pacmanSuccessorAxiomSingle(xg, yg, t+1, walls_grid))
-    #         currentGoalModel = findModel(conjoin(initialLogic, currentGoalLogic))
-        
-    #     if currentGoalModel is not False:
-    #         print(currentGoalModel)
-    #         return extractActionSequence(currentGoalModel, actions)
-
-    # return None
 
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
@@ -607,32 +535,57 @@ def localization(problem, agent) -> Generator:
         range(1, problem.getWidth()+1), range(1, problem.getHeight()+1)))
 
     KB = []
-    possible_locations = []
     "*** BEGIN YOUR CODE HERE ***"
 
     #add to KB where the walls are wall_list and aren't in wallList
-    for coors in walls_grid:
+    for coors in walls_list:
         x, y = coors
         KB.append(PropSymbolExpr(wall_str, x, y))
+    
     for coors in non_outer_wall_coords:
         x, y = coors
         KB.append(Expr("~",PropSymbolExpr(wall_str, x, y)))
-
+    
     for t in range(agent.num_timesteps):
+        print(t)
         #add pacphysics, action, and percept information to KB
         ##add pacphysics_axioms using sensorAxioms, and AllLegalsuccessorAxiom
-        
         KB.append(pacphysicsAxioms(t, all_coords, non_outer_wall_coords, walls_grid, 
-                sensorAxioms(t, non_outer_wall_coords), allLegalSuccessorAxioms(t, walls_grid, non_outer_wall_coords)))
-
+                sensorAxioms, allLegalSuccessorAxioms))
+        
         ##Pacman takes action prescribed by agent.actions[t]
         KB.append(PropSymbolExpr(agent.actions[t], time=t))
-
-        ##calling get.Percept and pass it to fourbitPerceptRules and add to KB 
-
         
+        ##calling get.Percept and pass it to fourbitPerceptRules and 
+        perCepts = agent.getPercepts()
+        #add the resulting percepts to KB 
+        KB.append(fourBitPerceptRules(t, perCepts))
+       
+
         #find posisble pacman locations with updated KB
+        possible_locations = []
+        ##iterate over non_outer_wall_coords
+        for coors in non_outer_wall_coords:
+            x, y = coors
+            xyPacMan = conjoin(PropSymbolExpr(pacman_str, x, y, time = t))
+            KBlogic = conjoin(KB)
+            print(findModel(conjoin(KBlogic, xyPacMan)))
+            print(findModel(conjoin(KBlogic, ~xyPacMan)))
+            ###can we prove whether Pacman is at (x,y)? can we prove wheter pacman is not (x,y)? Use entails and KB
+             ### there exists a satisfying agsignment where pacman is at (x,y) at time t, add (x,y) to possible locations
+            if entails(KBlogic, xyPacMan):
+                print(entails(KBlogic, xyPacMan))
+                possible_locations.append(coors)
+                print(coors, "good")
+                ### add to KB (x, y) locations where Pacman is provably at, at time t
+                KB.append(xyPacMan)
+            else:
+                ##add to KB  (x, y) locations where Pacman is provably not at, at time t.
+                KB.append(~xyPacMan)
+                print(coors, "bad")
+                
         #call agent.moveToNextState(action_t) on current agent action at timestep t
+        agent.moveToNextState(agent.actions[t]) 
 
         "*** END YOUR CODE HERE ***"
         #yield possible locations
