@@ -17,6 +17,7 @@ In logicPlan.py, you will implement logic planning methods which are called by
 Pacman agents (in logicAgents.py).
 """
 
+from dis import dis
 from typing import Dict, List, Tuple, Callable, Generator, Any
 
 from numpy import extract, true_divide
@@ -460,7 +461,6 @@ def positionLogicPlan(problem) -> List:
    
     "*** BEGIN YOUR CODE HERE ***"
 
-    
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0)) #use propsymbolexpr, not correct syntax, always make sure to append expr
     for t in range(50):
         print(t)
@@ -515,6 +515,35 @@ def foodLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
+
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0)) #use propsymbolexpr, not correct syntax, always make sure to append expr
+    for t in range(50):
+        print(t)
+        #for one in non_wall_coords:
+        propExpr = []
+        for x, y in non_wall_coords:
+            propExpr.append(PropSymbolExpr(pacman_str, x, y, time = t))
+        KB.append(exactlyOne(propExpr))
+        foodLogic = []
+        for x, y in food:
+            foodLogic.append(PropSymbolExpr(food_str, x, y, time=t))
+    
+        goal_assertion = ~disjoin(foodLogic)
+        #check if goal is satisfied
+        model = findModel(conjoin([goal_assertion] + KB))  
+        if model:
+            return extractActionSequence(model, actions)
+            
+        #pacman can only take one action per timestep  
+        conjoined = []
+        for action in actions:
+            conjoined.append(PropSymbolExpr(action, time=t))
+        KB.append(exactlyOne(conjoined))
+        for x, y in non_wall_coords:
+                KB.append(pacmanSuccessorAxiomSingle(x, y, t + 1, walls))
+                
+    return None
+
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
