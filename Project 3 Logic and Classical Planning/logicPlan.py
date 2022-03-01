@@ -607,15 +607,30 @@ def localization(problem, agent) -> Generator:
         range(1, problem.getWidth()+1), range(1, problem.getHeight()+1)))
 
     KB = []
-
+    possible_locations = []
     "*** BEGIN YOUR CODE HERE ***"
-    sensorAxioms
-    fourBitPerceptRules
 
     #add to KB where the walls are wall_list and aren't in wallList
+    for coors in walls_grid:
+        x, y = coors
+        KB.append(PropSymbolExpr(wall_str, x, y))
+    for coors in non_outer_wall_coords:
+        x, y = coors
+        KB.append(Expr("~",PropSymbolExpr(wall_str, x, y)))
 
     for t in range(agent.num_timesteps):
         #add pacphysics, action, and percept information to KB
+        ##add pacphysics_axioms using sensorAxioms, and AllLegalsuccessorAxiom
+        
+        KB.append(pacphysicsAxioms(t, all_coords, non_outer_wall_coords, walls_grid, 
+                sensorAxioms(t, non_outer_wall_coords), allLegalSuccessorAxioms(t, walls_grid, non_outer_wall_coords)))
+
+        ##Pacman takes action prescribed by agent.actions[t]
+        KB.append(PropSymbolExpr(agent.actions[t], time=t))
+
+        ##calling get.Percept and pass it to fourbitPerceptRules and add to KB 
+
+        
         #find posisble pacman locations with updated KB
         #call agent.moveToNextState(action_t) on current agent action at timestep t
 
@@ -624,7 +639,7 @@ def localization(problem, agent) -> Generator:
         yield possible_locations
 
 
-     util.raiseNotDefined()
+    util.raiseNotDefined()
 
 # ______________________________________________________________________________
 # QUESTION 7
