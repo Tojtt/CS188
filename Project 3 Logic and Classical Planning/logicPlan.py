@@ -600,24 +600,18 @@ def localization(problem, agent) -> Generator:
         possible_locations = []
         ##iterate over non_outer_wall_coords
         for coors in non_outer_wall_coords:
+            print(coors)
             x, y = coors
-            xyPacMan = PropSymbolExpr(pacman_str, x, y, time = t)
-            KBlogic = conjoin(KB)
-            print(entails(KBlogic, xyPacMan))
-            print(entails(KBlogic, ~xyPacMan))
             ###can we prove whether Pacman is at (x,y)? can we prove wheter pacman is not (x,y)? Use entails and KB
              ### there exists a satisfying agsignment where pacman is at (x,y) at time t, add (x,y) to possible locations
-            if entails(KBlogic, xyPacMan):
-                print(entails(KBlogic, xyPacMan))
-                possible_locations.append(coors)
-                print(coors, "good")
+            if entails(conjoin(KB), PropSymbolExpr(pacman_str, x, y, time = t)):
                 ### add to KB (x, y) locations where Pacman is provably at, at time t
-                KB.append(xyPacMan)
-            else:
+                KB.append(PropSymbolExpr(pacman_str, x, y, time = t))
+            if entails(conjoin(KB), ~PropSymbolExpr(pacman_str, x, y, time = t)):
                 ##add to KB  (x, y) locations where Pacman is provably not at, at time t.
-                KB.append(~xyPacMan)
-                print(coors, "bad")
-                
+                KB.append(~PropSymbolExpr(pacman_str, x, y, time = t))
+            if findModel(conjoin(PropSymbolExpr(pacman_str, x, y, time = t), KB)):
+                possible_locations += [coors]                 
         #call agent.moveToNextState(action_t) on current agent action at timestep t
         agent.moveToNextState(agent.actions[t]) 
 
