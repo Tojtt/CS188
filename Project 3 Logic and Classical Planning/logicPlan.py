@@ -514,65 +514,49 @@ def foodLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0))
-
-    for coors in food:
-        KB.append(PropSymbolExpr(food_str, coors[0], coors[1], time=0))
-    for coors in all_coords:
-        if coors not in food:
-            KB.append(~PropSymbolExpr(food_str, coors[0], coors[1], time=0))
-
+    KB.append(PropSymbolExpr(food_str, x0, y0, time = 0)) 
+    for x, y in food:
+        KB.append(PropSymbolExpr(food_str, x, y, time = 0)) 
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0)) 
+    #KB.append(PropSymbolExpr(food_str, x0, y0, time = 0)) 
     for t in range(50):
         print(t)
-        for coors in food:
-            KB.append(PropSymbolExpr(food_str, coors[0], coors[1], time= t +1) % conjoin(~PropSymbolExpr(pacman_str, coors[0], coors[1], time= t), PropSymbolExpr(food_str, coors[0], coors[1], time= t)))
 
-        for coors in non_wall_coords:
-            #Transition Model sentences: call pacmanSuccessorAxiomSingle(...) for all possible pacman positions in non_wall_coords.
-            KB.append(pacmanSuccessorAxiomSingle(coors[0], coors[1], t + 1, walls))
+        propExpr = []
+        for x, y in non_wall_coords:
+            propExpr.append(PropSymbolExpr(pacman_str, x, y, time = t))
+        KB.append(exactlyOne(propExpr))
 
-        foodLogic = []
-        for coors in food:
-            foodLogic.append(PropSymbolExpr(food_str, coors[0], coors[1], time=t))
-        goal_assertion = ~disjoin(foodLogic) 
-        goal = findModel(conjoin(goal_assertion, conjoin(KB)))
-        if goal:
-            return extractActionSequence(goal, actions)
+        foods = []
+        for x, y in food:
+            foods.append(PropSymbolExpr(food_str, x, y, time = t))
+        #KB.append(exactlyOne(foods)) #maybe not
+        goal_assertion = ~disjoin(foods) #disjoin??
 
-    # KB.append(PropSymbolExpr(pacman_str, x0, y0, time = 0)) #use propsymbolexpr, not correct syntax, always make sure to append expr
+        model = findModel(conjoin([goal_assertion] + KB))
+        if model:
+            return extractActionSequence(model, actions) #program dies upon entering here
 
-    # for t in range(50):
-    #     print(t)
-    #     #for one in non_wall_coords:
-    #     propExpr = []
-    #     for coors in non_wall_coords:
-    #         propExpr.append(PropSymbolExpr(pacman_str, coors[0], coors[1], time = t))
-    #     KB.append(exactlyOne(propExpr))
-        
-    #     foodLogic = []
-    #     for coors in food:
-    #         foodLogic.append(PropSymbolExpr(food_str, coors[0], coors[1], time=t))
-    
-    #     goal_assertion = ~disjoin(foodLogic)
-    #     #check if goal is satisfied
-    #     model = findModel(conjoin(conjoin(KB), goal_assertion))  
-    #     if model:
-    #         return extractActionSequence(model, actions)
-            
-    #     #pacman can only take one action per timestep  
-    #     conjoined = []
-    #     for action in actions:
-    #         conjoined.append(PropSymbolExpr(action, time=t))
-    #     KB.append(exactlyOne(conjoined))
+        action_lst = [] #im not conjoining here
+        for action in actions:
+            action_lst.append(PropSymbolExpr(action, time=t))
+        KB.append(exactlyOne(action_lst))
 
-    #     #Transition Model sentences: call pacmanSuccessorAxiomSingle(...) for all possible pacman positions in non_wall_coords.
-    #     for coors in non_wall_coords:
-    #             KB.append(pacmanSuccessorAxiomSingle(coors[0], coors[1], t + 1, walls))
-    #     for coors in food:
-    #         #food is at a coordinate in t+1 only if food is at the coordinate currently and pacman is not there
-    #         if PropSymbolExpr(food_str, coors[0], coors[1], time = t + 1):
-    #             KB.append(PropSymbolExpr(food_str, coors[0], coors[1], time= t +1) % conjoin(~PropSymbolExpr(pacman_str, coors[0], coors[1], time= t), PropSymbolExpr(food_str, coors[0], coors[1], time= t)))
-    # return None
+        #for x, y in non_wall_coords:
+        #    KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls_grid))
+
+        for x, y in non_wall_coords:
+            KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls))
+            food_pres_t = PropSymbolExpr(food_str, x, y, time = t)
+            pacman_pres = PropSymbolExpr(pacman_str, x, y, time=t)
+            food_still_pres = PropSymbolExpr(food_str, x, y, time=t+1)
+            KB.append((food_pres_t & ~pacman_pres) >> food_still_pres) #food present AND pacman not there, then food still present
+            KB.append((food_pres_t & pacman_pres) >> ~food_still_pres)
+            #KB.append((~food_pres_t & pacman_pres) >> ~food_still_pres)
+            #KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls_grid))
+
+    return None
+
     "*** END YOUR CODE HERE ***"
 
 # ______________________________________________________________________________
