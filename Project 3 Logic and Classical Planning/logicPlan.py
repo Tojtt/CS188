@@ -777,13 +777,13 @@ def slam(problem, agent) -> Generator:
                 KB.append(xyWall)
                 known_map[x][y] = 1
                
-            else:
+            elif entails(KBlogic, ~xyWall):
                 ##add to KB and update knownmap that (x, y) is probably not a wall.
                 KB.append(~xyWall)
-                known_map[x][y] = -1
+                known_map[x][y] = 0
 
-            # else:
-            #     known_map[x][y] = 0 
+            else:
+                known_map[x][y] = -1
 
             xyPacMan = PropSymbolExpr(pacman_str, x, y, time = t)
             KBlogic = conjoin(KB)
