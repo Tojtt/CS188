@@ -107,7 +107,9 @@ def joinFactors(factors: ValuesView[Factor]):
     variableDomainsDict = {}
 
     if factors and len(factors) > 0:
-        variableDomainsDict = factors[0].variableDomainsDict()
+        for f in factors:
+            variableDomainsDict = f.variableDomainsDict()
+            break
 
     for f in factors:
         temp_unconditioned = f.unconditionedVariables()
@@ -177,7 +179,20 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        unconditioned = factor.unconditionedVariables()
+        unconditioned = [var for var in unconditioned if var != eliminationVariable]
+        conditioned = factor.conditionedVariables()
+        variableDomainsDict = factor.variableDomainsDict()
+        domain = variableDomainsDict[eliminationVariable]
+        newFactor = Factor(unconditioned, conditioned, variableDomainsDict)
+        for assignment in newFactor.getAllPossibleAssignmentDicts():
+            prob = 0
+            for elim_val in domain:
+                old_assignment = assignment.copy()
+                old_assignment[eliminationVariable] = elim_val
+                prob += factor.getProbability(old_assignment)
+            newFactor.setProbability(assignment, prob)
+        return newFactor
         "*** END YOUR CODE HERE ***"
 
     return eliminate
