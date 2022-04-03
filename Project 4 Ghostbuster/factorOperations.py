@@ -102,7 +102,31 @@ def joinFactors(factors: ValuesView[Factor]):
 
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    unconditioned = []
+    conditioned = []
+    variableDomainsDict = {}
+
+    if factors and len(factors) > 0:
+        variableDomainsDict = factors[0].variableDomainsDict()
+
+    for f in factors:
+        temp_unconditioned = f.unconditionedVariables()
+        temp_conditioned = f.conditionedVariables()
+        unconditioned.extend(temp_unconditioned)
+        for conditioned_var in temp_conditioned:
+            if conditioned_var not in conditioned:
+                conditioned.append(conditioned_var)
+    conditioned = [var for var in conditioned if var not in unconditioned]
+
+    newFactor = Factor(unconditioned, conditioned, variableDomainsDict)
+    assignments = newFactor.getAllPossibleAssignmentDicts()
+    for assignment in assignments:
+        prob = 1
+        for factor in factors:
+            prob *= factor.getProbability(assignment)
+        newFactor.setProbability(assignment, prob)
+
+    return newFactor
     "*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
