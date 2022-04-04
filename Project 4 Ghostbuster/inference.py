@@ -630,7 +630,7 @@ class ExactInference(InferenceModule):
             for newPosition in newPosDist.keys():
                 distable[newPosition] += old_prob * newPosDist[newPosition]
         self.beliefs = distable
-        
+
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
@@ -684,11 +684,11 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        dist = DiscreteDistribution()
+        distable = DiscreteDistribution()
         for p in self.particles:
-            dist[p] += 1
-        dist.normalize()
-        return dist
+            distable[p] += 1
+        distable.normalize()
+        return distable
         "*** END YOUR CODE HERE ***"
     
     ########### ########### ###########
@@ -710,17 +710,17 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         pacmanPosition = gameState.getPacmanPosition()
         jailPosition = self.getJailPosition()
-        dist = DiscreteDistribution()
+        distable = DiscreteDistribution()
         for p in self.particles:
             prob = self.getObservationProb(observation, pacmanPosition, p, jailPosition)
-            dist[p] += prob
-        if dist.total() == 0:
+            distable[p] += prob
+        if distable.total() == 0:
             self.initializeUniformly(gameState)
         else:
-            dist.normalize()
-            self.beliefs = dist     
+            distable.normalize()
+            self.beliefs = distable     
             for i in range(self.numParticles):
-                new_sample = dist.sample()
+                new_sample = distable.sample()
                 self.particles[i] = new_sample
         "*** END YOUR CODE HERE ***"
     
