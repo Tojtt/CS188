@@ -193,13 +193,17 @@ def eliminateWithCallTracking(callTrackingList=None):
         ## get the dictionary of values of the variable
         variableDomainsDict = factor.variableDomainsDict()
         ## then get the values of the variable we are eliminating 
-        domain = variableDomainsDict[eliminationVariable]
+        eli_domain = variableDomainsDict[eliminationVariable]
         newFactor = Factor(unconditioned, conditioned, variableDomainsDict)
+        ##then for every assignment in the newfactor
         for assignment in newFactor.getAllPossibleAssignmentDicts():
+            ##set it to 0
             prob = 0
-            for elim_val in domain:
+            #for everyone variable being eliminated (only one in this case) 
+            #sum out the probablity in the factor
+            for eli_val in eli_domain:
                 old_assignment = assignment.copy()
-                old_assignment[eliminationVariable] = elim_val
+                old_assignment[eliminationVariable] = eli_val
                 prob += factor.getProbability(old_assignment)
             newFactor.setProbability(assignment, prob)
         return newFactor
