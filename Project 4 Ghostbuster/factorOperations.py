@@ -105,23 +105,28 @@ def joinFactors(factors: ValuesView[Factor]):
     unconditioned = []
     conditioned = []
     variableDomainsDict = {}
-
+    ## get the variable dictionary
     if factors and len(factors) > 0:
         for f in factors:
             variableDomainsDict = f.variableDomainsDict()
             break
-
+    ##check each factor        
     for f in factors:
         temp_unconditioned = f.unconditionedVariables()
         temp_conditioned = f.conditionedVariables()
+        ##add all the unconditions into the list
         unconditioned.extend(temp_unconditioned)
-        for conditioned_var in temp_conditioned:
-            if conditioned_var not in conditioned:
-                conditioned.append(conditioned_var)
+        for con_var in temp_conditioned:
+            if con_var not in conditioned:
+                conditioned.append(con_var)
+    ##then add all the condition variables together while make sure they are not in the uncondition list
     conditioned = [var for var in conditioned if var not in unconditioned]
 
+    ## create newfactor
     newFactor = Factor(unconditioned, conditioned, variableDomainsDict)
     assignments = newFactor.getAllPossibleAssignmentDicts()
+    
+    ##then compute the probabilitities for the factors 
     for assignment in assignments:
         prob = 1
         for factor in factors:
@@ -179,10 +184,15 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
+        ##get the unconditioned variables
         unconditioned = factor.unconditionedVariables()
+        ##then take out the eliminated variable
         unconditioned = [var for var in unconditioned if var != eliminationVariable]
+        ##get the conditioned variables
         conditioned = factor.conditionedVariables()
+        ## get the dictionary of values of the variable
         variableDomainsDict = factor.variableDomainsDict()
+        ## then get the values of the variable we are eliminating 
         domain = variableDomainsDict[eliminationVariable]
         newFactor = Factor(unconditioned, conditioned, variableDomainsDict)
         for assignment in newFactor.getAllPossibleAssignmentDicts():
