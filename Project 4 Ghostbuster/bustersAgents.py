@@ -152,8 +152,7 @@ class GreedyBustersAgent(BustersAgent):
         ##set variables
         distance = float("inf")
         ghost_position = None
-        dist = float("inf")
-        chosenaction = None
+        
         ##for each ghostposition distribution
         for dist in livingGhostPositionDistributions:
             ##get the maximum of all position
@@ -165,7 +164,8 @@ class GreedyBustersAgent(BustersAgent):
                 distance = temp_distance
                 ghost_position = temp_position
 
-        
+        dist = float("inf")
+        chosenaction = None
         for legalact in legal:
             succ_pos = Actions.getSuccessor(pacmanPosition, legalact)
             temp = self.distancer.getDistance(succ_pos, ghost_position)
