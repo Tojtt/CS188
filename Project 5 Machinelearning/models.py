@@ -69,7 +69,8 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.lr = .01
+        ##create three layers parameters
+        self.learnrate = .01
         self.w1 = nn.Parameter(1, 128)
         self.b1 = nn.Parameter(1, 128)
         self.w2 = nn.Parameter(128, 64)
@@ -88,13 +89,15 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+
+        ##formular is  ReLU(ReLU(x*w + b1)*w2 + b2)* w3 + b3
         first_layer = nn.ReLU(nn.AddBias(nn.Linear(x, self.w1),\
                                 self.b1))
         second_layer = nn.ReLU(nn.AddBias(nn.Linear(first_layer, self.w2),\
                                 self.b2))
-        output_layer = nn.AddBias(nn.Linear(second_layer, self.w3),\
+        output = nn.AddBias(nn.Linear(second_layer, self.w3),\
                                self.b3)
-        return output_layer
+        return output
 
     def get_loss(self, x, y):
         """
@@ -107,24 +110,25 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        y_hat = self.run(x)
-        return nn.SquareLoss(y_hat, y)
+        predicted_y = self.run(x)
+        return nn.SquareLoss(predicted_y, y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        batch_size = 50
+        batch_size = 100
         loss = float('inf')
-        while loss >= .015:
+        ##if loss is above .02
+        while loss >= .02:
+            ##iterate over batch size
             for x, y in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x, y)
-                print(nn.as_scalar(loss))
                 grads = nn.gradients(loss, self.params)
                 loss = nn.as_scalar(loss)
                 for i in range(len(self.params)):
-                    self.params[i].update(grads[i], -self.lr)
+                    self.params[i].update(grads[i], -self.learnrate)
 
 class DigitClassificationModel(object):
     """
@@ -143,7 +147,9 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.lr = .1
+
+        ##four layers
+        self.learnrate = .1
         self.w1 = nn.Parameter(784, 256)
         self.b1 = nn.Parameter(1, 256)
         self.w2 = nn.Parameter(256, 128)
@@ -177,9 +183,9 @@ class DigitClassificationModel(object):
                                 self.b2))
         third_layer = nn.ReLU(nn.AddBias(nn.Linear(second_layer, self.w3),\
                                 self.b3))
-        output_layer = nn.AddBias(nn.Linear(third_layer, self.w4),\
+        output = nn.AddBias(nn.Linear(third_layer, self.w4),\
                                self.b4)
-        return output_layer
+        return output
 
     def get_loss(self, x, y):
         """
@@ -195,8 +201,8 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        y_hat = self.run(x)
-        return nn.SoftmaxLoss(y_hat, y)
+        predicted_y = self.run(x)
+        return nn.SoftmaxLoss(predicted_y, y)
 
     def train(self, dataset):
         """
@@ -205,15 +211,15 @@ class DigitClassificationModel(object):
         "*** YOUR CODE HERE ***"
         batch_size = 100
         loss = float('inf')
-        valid_acc = 0
-        while valid_acc < .98:
+        validation_acc = 0
+        while validation_acc < .98:
             for x, y in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x, y)
                 grads = nn.gradients(loss, self.params)
                 loss = nn.as_scalar(loss)
                 for i in range(len(self.params)):
-                    self.params[i].update(grads[i], -self.lr)
-            valid_acc = dataset.get_validation_accuracy()
+                    self.params[i].update(grads[i], -self.learnrate)
+            validation_acc = dataset.get_validation_accuracy()
 
 
 class LanguageIDModel(object):
@@ -234,7 +240,7 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.lr = .1
+        self.learnrate = .1
         self.initial_w = nn.Parameter(self.num_chars, 256)
         self.initial_b = nn.Parameter(1, 256)
         self.x_w = nn.Parameter(self.num_chars, 256)
@@ -299,8 +305,8 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        y_hat = self.run(xs)
-        return nn.SoftmaxLoss(y_hat, y)
+        predicted_y = self.run(xs)
+        return nn.SoftmaxLoss(predicted_y, y)
 
     def train(self, dataset):
         """
@@ -309,12 +315,12 @@ class LanguageIDModel(object):
         "*** YOUR CODE HERE ***"
         batch_size = 100
         loss = float('inf')
-        valid_acc = 0
-        while valid_acc < .85:
+        validation_acc = 0
+        while validation_acc < .85:
             for x, y in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x, y)
                 grads = nn.gradients(loss, self.params)
                 loss = nn.as_scalar(loss)
                 for i in range(len(self.params)):
-                    self.params[i].update(grads[i], -self.lr)
-            valid_acc = dataset.get_validation_accuracy()
+                    self.params[i].update(grads[i], -self.learnrate)
+            validation_acc = dataset.get_validation_accuracy()
