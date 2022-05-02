@@ -23,50 +23,50 @@ def question2a():
     """
       Prefer the close exit (+1), risking the cliff (-10).
     """
-    answerDiscount = .8
-    answerNoise = 0
-    answerLivingReward = -4
-    return answerDiscount, answerNoise, answerLivingReward
+    chosenDiscount = .8
+    chosenNoise = 0
+    chosenLivingReward = -4
+    return chosenDiscount, chosenNoise, chosenLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question2b():
     """
       Prefer the close exit (+1), but avoiding the cliff (-10).
     """
-    answerDiscount = .2
-    answerNoise = .21
-    answerLivingReward = .6
-    return answerDiscount, answerNoise, answerLivingReward
+    chosenDiscount = .2
+    chosenNoise = .21
+    chosenLivingReward = .6
+    return chosenDiscount, chosenNoise, chosenLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question2c():
     """
       Prefer the distant exit (+10), risking the cliff (-10).
     """
-    answerDiscount = 1
-    answerNoise = 0
-    answerLivingReward = -1
-    return answerDiscount, answerNoise, answerLivingReward
+    chosenDiscount = 1
+    chosenNoise = 0
+    chosenLivingReward = -1
+    return chosenDiscount, chosenNoise, chosenLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question2d():
     """
       Prefer the distant exit (+10), avoiding the cliff (-10).
     """
-    answerDiscount = .7
-    answerNoise = .4
-    answerLivingReward = 2
-    return answerDiscount, answerNoise, answerLivingReward
+    chosenDiscount = .7
+    chosenNoise = .4
+    chosenLivingReward = 2
+    return chosenDiscount, chosenNoise, chosenLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question2e():
     """
       Avoid both exits and the cliff (so an episode should never terminate).
     """
-    answerDiscount = 0
-    answerNoise = 1
-    answerLivingReward = 0
-    return answerDiscount, answerNoise, answerLivingReward
+    chosenDiscount = 0
+    chosenNoise = 1
+    chosenLivingReward = 0
+    return chosenDiscount, chosenNoise, chosenLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 if __name__ == '__main__':

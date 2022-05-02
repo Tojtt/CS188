@@ -65,19 +65,24 @@ class ValueIterationAgent(ValueEstimationAgent):
           value iteration, V_k+1(...) depends on V_k(...)'s.
         """
         "*** YOUR CODE HERE ***"
+        # while number of iterations is not finished
         while self.iterations != 0:
             self.iterations -= 1
-            new_values = util.Counter() # store new value of a state
-            update_flag = util.Counter() # store whether a state has been updated
+            # store new value of a state
+            best_values = util.Counter()
+            # store whether a state has been updated
+            update_check = util.Counter() 
+            # for each state available
             for state in self.mdp.getStates():
+                #get the valu of the state
                 best_action = self.computeActionFromValues(state)
                 if best_action:
                     new_value = self.computeQValueFromValues(state, best_action)
-                    new_values[state] = new_value
-                    update_flag[state] = 1
+                    best_values[state] = new_value
+                    update_check[state] = 1
             for state in self.mdp.getStates():
-                if update_flag[state]:
-                    self.values[state] = new_values[state]
+                if update_check[state]:
+                    self.values[state] = best_values[state]
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
@@ -90,14 +95,12 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        q_value = .0
-        state_prob = self.mdp.getTransitionStatesAndProbs\
-                              (state, action)
-        for new_state, prob in state_prob:
-            q_value += prob * (self.mdp.getReward(state, action, new_state)+\
-                              self.discount * self.getValue(new_state))
-        return q_value
-
+        Q_value = .0
+        #get probability of transition state
+        trans_prob = self.mdp.getTransitionStatesAndProbs(state, action)
+        for new_state, prob in trans_prob:
+            Q_value += prob * (self.mdp.getReward(state, action, new_state)+ self.discount * self.getValue(new_state))
+        return Q_value
 
 
     def computeActionFromValues(self, state):
@@ -114,15 +117,14 @@ class ValueIterationAgent(ValueEstimationAgent):
         actions = self.mdp.getPossibleActions(state)
         if not actions:
             return None
+
+        # create holder place for action/reward tuple
         best_action, best_reward = '', -1e9
         for action in actions:
-            state_prob = self.mdp.\
-                         getTransitionStatesAndProbs\
-                         (state, action)
+            trans_prob = self.mdp.getTransitionStatesAndProbs(state, action)
             reward = 0
-            for new_state, prob in state_prob:
-                reward += prob * (self.mdp.getReward(state, action, new_state)+\
-                                 self.discount * self.getValue(new_state))
+            for new_state, prob in trans_prob:
+                reward += prob * (self.mdp.getReward(state, action, new_state)+self.discount * self.getValue(new_state))
             if reward > best_reward:
                 best_reward = reward
                 best_action = action

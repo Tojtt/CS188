@@ -64,6 +64,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
+        # create holder place for action/reward tuple
         if not actions:
             return 0.0
         best_action, best_reward = '', -1e9
@@ -105,9 +106,6 @@ class QLearningAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
-        legalActions = self.getLegalActions(state)
-        action = None
-        "*** YOUR CODE HERE ***"
         legalActions = self.getLegalActions(state)
         action = None
         "*** YOUR CODE HERE ***"
@@ -192,12 +190,11 @@ class ApproximateQAgent(PacmanQAgent):
         "*** YOUR CODE HERE ***"
         features = self.featExtractor.getFeatures(state, action)
         weights = self.getWeights()
-        # if weights[(state, action)] == 0:
-        value = 0.0
+
+        Q_value = 0.0
         for feature in features:
-            # print(feature, features[feature], weights[feature])
-            value += features[feature] * weights[feature]
-        return value
+            Q_value += features[feature] * weights[feature]
+        return Q_value
       
 
     def update(self, state, action, nextState, reward: float):
